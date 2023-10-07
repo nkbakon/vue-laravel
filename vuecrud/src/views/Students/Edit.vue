@@ -27,7 +27,7 @@
                     <input type="text" v-model="model.student.phone" class="form-control">
                 </div>
                 <div class="mb-3">
-                    <button type="button" @click="saveStudent" class="btn btn-primary">Save</button>
+                    <button type="button" @click="updateStudent" class="btn btn-primary">Update</button>
                 </div>
             </div>
         </div>
@@ -41,6 +41,7 @@ export default {
     name: 'studentEdit',
     data(){
         return{
+            studentId: '',
             errorList: '',
             model: {
                 student: {
@@ -54,6 +55,7 @@ export default {
     },
     mounted(){
         //console.log(this.$route.params.id);
+        this.studentId = this.$route.params.id;
         this.getStudentData(this.$route.params.id);
     },
     methods: {
@@ -71,25 +73,22 @@ export default {
                 }
             });
         },
-        saveStudent(){
+        updateStudent(){
             var mythis = this;
-            axios.post('http://127.0.0.1:8000/api/students', this.model.student)
+            axios.put(`http://127.0.0.1:8000/api/students/${this.studentId}/edit`, this.model.student)
                 .then(res => {
                     console.log(res)
                     alert(res.data.message);
-
-                    this.model.student = {
-                        name: '',
-                        course: '',
-                        email: '',
-                        phone: ''
-                    }
+                    
                     this.errorList = '';
                 })
                 .catch(function (error) {
                     if (error.response) {
                         if(error.response.status == 422){
                             mythis.errorList = error.response.data.errors;
+                        }
+                        if(error.response.status == 404){
+                            alert(error.response.data.message);
                         }
                         //console.log(error.response.data);
                         //console.log(error.response.status);
